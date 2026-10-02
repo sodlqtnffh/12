@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>신나는 모양 탐험대 - 도형 사진 붙이기</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--ink:#173047;--paper:#fffdf6;--square:#ef6b55;--triangle:#f5b84b;--circle:#42a6a2;--soft:#31576a}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper);font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif}
+.title-font{font-family:"Fraunces","Noto Serif KR",serif}
+.app-shell{padding:clamp(16px,3vw,30px) clamp(14px,3vw,22px) 42px;min-height:100vh;background-image:radial-gradient(circle at 11% 6%,rgba(255,202,112,.31),transparent 23rem),radial-gradient(circle at 92% 16%,rgba(88,190,181,.22),transparent 20rem)}
+.lesson-board{max-width:1120px;margin:0 auto}
+.view{display:none}.view.is-active{display:block;animation:rise .38s ease both}
+.hero-card,.dashboard-heading{position:relative;overflow:hidden;border:3px solid var(--ink);border-radius:30px;box-shadow:8px 8px 0 var(--ink)}
+.hero-card{min-height:440px;display:grid;place-items:center;padding:clamp(26px,5vw,52px);text-align:center}
+.home-content{width:min(100%,720px)}
+.shape-parade{display:flex;justify-content:center;align-items:flex-end;gap:clamp(12px,3vw,28px);margin:20px 0 30px}
+.shape-parade svg{width:clamp(54px,9vw,84px);height:clamp(54px,9vw,84px);animation:bob 3s ease-in-out infinite}
+.shape-parade svg:nth-child(2){animation-delay:.35s}.shape-parade svg:nth-child(3){animation-delay:.7s}
+.student-choices,.student-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.student-choices{max-width:620px;margin:30px auto 0}
+.student-button,.nav-button,.complete-button,.dashboard-button{border:3px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 rgba(23,48,71,.22);font-weight:700;transition:all .16s ease;cursor:pointer}
+.student-button:hover,.nav-button:hover,.complete-button:hover,.dashboard-button:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(23,48,71,.22)}
+.student-button{min-height:112px;padding:18px}
+.student-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:2px solid var(--ink);border-radius:999px;background:#fff8dc;font-weight:700;font-size:1.1rem}
+.shape-row{display:grid;grid-template-columns:165px minmax(0,1fr);gap:14px;padding:20px;border:3px solid var(--ink);border-radius:24px;box-shadow:6px 6px 0 rgba(23,48,71,.14);margin-bottom:20px}
+.shape-label{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:178px;padding:16px;border:2px dashed rgba(23,48,71,.28);border-radius:18px;text-align:center}
+.photo-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.photo-slot{position:relative;min-height:178px;overflow:hidden;border:2.5px dashed #98aeb4;border-radius:18px;background:rgba(255,255,255,.85)}
+.photo-slot.has-photo{border-style:solid;border-color:var(--ink)}
+.photo-preview{position:absolute;inset:0;display:none;background-position:center;background-size:cover}
+.photo-slot.has-photo .photo-preview{display:block}
+.photo-trigger{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border:0;background:transparent;cursor:pointer}
+.photo-slot.has-photo .photo-trigger{align-items:flex-end;justify-content:flex-end;padding:12px;background:linear-gradient(to top,rgba(23,48,71,.55),transparent 40%)}
+.plus-badge{display:grid;width:54px;height:54px;place-items:center;border:2.5px solid var(--ink);border-radius:50%;background:var(--paper);box-shadow:3px 3px 0 rgba(23,48,71,.18);font-size:28px;font-weight:bold}
+.photo-slot.has-photo .plus-badge{width:38px;height:38px;font-size:18px;background:rgba(255,255,255,.9);color:var(--ink)!important;box-shadow:none}
+.camera-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.summary-card{padding:24px;border:3px solid var(--ink);border-radius:24px;box-shadow:6px 6px 0 rgba(23,48,71,.14)}
+.summary-card.jw{background:#fff0eb}.summary-card.sy{background:#e8f8f5}
+.summary-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}
+.mini-stat{padding:10px 7px;border:2px solid rgba(23,48,71,.18);border-radius:13px;background:rgba(255,255,255,.72);text-align:center}
+.status-line{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:rgba(255,255,255,.8);font-weight:700;border:2px solid rgba(23,48,71,.1)}
+.status-dot{width:14px;height:14px;border:2px solid var(--ink);border-radius:50%;background:var(--triangle)}
+.status-dot.done{background:var(--circle)}
+.dashboard-photos{display:grid;gap:12px;margin-top:18px}
+.dashboard-shape{padding:12px;border:2px solid rgba(23,48,71,.16);border-radius:16px;background:rgba(255,255,255,.75)}
+.thumb-row{display:flex;gap:10px;min-height:64px}
+.thumb{width:68px;height:64px;flex:0 0 auto;border:2px solid var(--ink);border-radius:12px;background-position:center;background-size:cover;cursor:pointer}
+.empty-thumb{display:grid;width:68px;height:64px;place-items:center;border:2px dashed #98aeb4;border-radius:12px;color:#607886;font-size:.75rem;font-weight:bold}
+.modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,26,38,.8)}
+.modal.is-open{display:flex}
+.modal-card{width:min(100%,720px);overflow:hidden;border:3px solid var(--ink);border-radius:24px;background:#fffdf6}
+.modal-image{display:block;width:100%;max-height:65vh;object-fit:contain;background:#173047}
+.live-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:2px solid var(--ink);border-radius:999px;background:#fff;font-size:.85rem;font-weight:700}
+.live-dot{width:10px;height:10px;border-radius:50%;background:#aaa}
+.live-badge.on .live-dot{background:#2bb673;animation:pulse 1.4s infinite}
+.notice{margin-bottom:14px;padding:10px 14px;border:2px solid var(--ink);border-radius:14px;background:#ffe9c2;font-weight:700;display:none}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes pulse{50%{opacity:.35}}
+@media(max-width:720px){.student-choices,.student-summary-grid{grid-template-columns:1fr}.shape-row{grid-template-columns:1fr}.shape-label{min-height:auto;flex-direction:row;justify-content:flex-start;gap:14px;text-align:left;padding:12px}}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#fffdf6}}
+</style>
+</head>
+<body>
+<div class="app-shell"><main class="lesson-board">
+<div id="notice" class="notice"></div>
+
+<!-- HOME -->
+<section id="home-view" class="view is-active">
+  <header class="hero-card" style="background:linear-gradient(135deg,#fff7d8,#dff5ef)">
+    <div class="home-content">
+      <p class="text-sm font-bold tracking-widest text-[#31576a] uppercase mb-2">1학년 수학 · 모양 찾기</p>
+      <h1 class="title-font text-4xl sm:text-5xl font-extrabold mb-2">신나는 모양 탐험대! 🔍</h1>
+      <div class="shape-parade" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" rx="6" fill="#ef6b55" stroke="#173047" stroke-width="6"/></svg>
+        <svg viewBox="0 0 100 100"><path d="M50 12 L90 86 H10 Z" fill="#f5b84b" stroke="#173047" stroke-width="6" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="#42a6a2" stroke="#173047" stroke-width="6"/></svg>
+      </div>
+      <p class="text-lg sm:text-xl font-medium text-[#31576a] mb-6">내 이름을 누르고 교실에서 모양을 찾아 사진을 찍어 보아요!</p>
+      <div class="student-choices">
+        <button id="choose-jw" class="student-button bg-[#fff0eb] hover:bg-[#ffe2d8]"><span class="block text-xl mb-1">✦</span><span class="text-[#b73e2e] font-extrabold text-2xl sm:text-3xl">김지완</span></button>
+        <button id="choose-sy" class="student-button bg-[#e8f8f5] hover:bg-[#d1f2eb]"><span class="block text-xl mb-1">✦</span><span class="text-[#16736f] font-extrabold text-2xl sm:text-3xl">최서연</span></button>
+      </div>
+    </div>
+  </header>
+  <div class="flex justify-center mt-6"><button id="open-dashboard-home" class="dashboard-button px-6 py-3 text-lg bg-white">📊 교사 대시보드</button></div>
+</section>
+
+<!-- ACTIVITY -->
+<section id="activity-view" class="view">
+  <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div>
+      <span class="student-chip">🙋 <span id="active-student-name">김지완</span></span>
+      <h1 class="title-font text-2xl sm:text-3xl font-extrabold mt-3">우리 주변에서 네모, 세모, 동그라미를 찾아 보아요!</h1>
+      <p class="text-[#31576a] font-medium mt-1">📷 <b>+</b> 버튼을 눌러 카메라로 모양 사진을 2장씩 찍어주세요!</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button id="back-home-activity" class="nav-button px-4 py-2 bg-white">첫 화면</button>
+      <button id="open-dashboard-activity" class="nav-button px-4 py-2 bg-white">교사 대시보드</button>
+    </div>
+  </header>
+  <div id="activity-list"></div>
+  <input id="global-camera-input" class="camera-input" type="file" accept="image/*" capture="environment">
+  <div class="flex flex-wrap items-center justify-between gap-4 mt-8 pt-4 border-t-2 border-dashed border-[#173047]/20">
+    <button id="complete-button" class="complete-button px-6 py-3 text-lg bg-[#dff5ef]">✅ 활동 완료 및 제출하기</button>
+    <div id="save-status-msg" class="text-base font-bold text-[#31576a]"></div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard-view" class="view">
+  <header class="dashboard-heading bg-gradient-to-r from-[#fff7d8] to-[#dff5ef] p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-bold tracking-widest text-[#31576a] uppercase mb-1">교사용 실시간 확인</p>
+        <h1 class="title-font text-3xl font-extrabold">📊 교사 대시보드</h1>
+        <p class="text-[#31576a] font-medium text-sm mt-1">학생 태블릿에서 찍은 사진이 자동으로 나타납니다.</p>
+        <span id="live-badge" class="live-badge mt-2"><span class="live-dot"></span><span id="live-text">연결 중…</span></span>
+      </div>
+      <div class="flex gap-2 self-start md:self-auto"><button id="reset-all" class="nav-button px-4 py-2.5 bg-[#ffe2d8]">🗑 전체 초기화</button><button id="back-home-dashboard" class="nav-button px-5 py-2.5 bg-white">첫 화면으로</button></div>
+    </div>
+  </header>
+  <section id="summary-grid" class="student-summary-grid"></section>
+</section>
+</main></div>
+
+<div id="photo-modal" class="modal">
+  <div class="modal-card">
+    <img id="modal-image" class="modal-image" alt="확대 이미지">
+    <div class="p-4 flex justify-between items-center border-t-2 border-[#173047]">
+      <span id="modal-caption" class="font-bold">도형 사진</span>
+      <button id="close-modal" class="nav-button px-5 py-2 text-sm bg-[#ffe2d8]">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, collection, onSnapshot, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ▼▼▼ Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)에서 복사한 값으로 바꾸세요 ▼▼▼
+const firebaseConfig = {
+  apiKey: "여기에_apiKey",
+  authDomain: "여기에.firebaseapp.com",
+  projectId: "여기에_projectId",
+  storageBucket: "여기에.appspot.com",
+  messagingSenderId: "여기에",
+  appId: "여기에_appId"
+};
+// ▲▲▲ ----------------------------------------------------- ▲▲▲
+const STUDENTS = [
+  {key:"jw", name:"김지완", cls:"jw", color:"#b73e2e"},
+  {key:"sy", name:"최서연", cls:"sy", color:"#16736f"}
+];
+const SHAPES = [
+  {id:"square", name:"네모", color:"#b73e2e", bg:"#fff0eb", svg:'<rect x="15" y="15" width="70" height="70" rx="4" fill="#ef6b55" stroke="#173047" stroke-width="5"/>'},
+  {id:"triangle", name:"세모", color:"#9b6600", bg:"#fff8dc", svg:'<path d="M50 12 L90 86 H10 Z" fill="#f5b84b" stroke="#173047" stroke-width="5" stroke-linejoin="round"/>'},
+  {id:"circle", name:"동그라미", color:"#16736f", bg:"#e8f8f5", svg:'<circle cx="50" cy="50" r="37" fill="#42a6a2" stroke="#173047" stroke-width="5"/>'}
+];
+const $ = id => document.getElementById(id);
+let activeStudent = null, pending = null, db = null;
+
+// 공유 상태 (db 스냅샷으로 갱신)
+const state = {};
+STUDENTS.forEach(s => state[s.key] = {completed:false, square:["",""], triangle:["",""], circle:["",""]});
+
+function showNotice(msg){ const n=$("notice"); n.textContent=msg; n.style.display=msg?"block":"none"; }
+function setLive(on, text){ $("live-badge").classList.toggle("on", on); $("live-text").textContent = text; }
+
+function showView(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("is-active"));
+  $(id).classList.add("is-active");
+  window.scrollTo({top:0});
+}
+function currentView(){ return document.querySelector(".view.is-active").id; }
+
+// 활동 화면 뼈대 생성
+function buildActivity(){
+  $("activity-list").innerHTML = SHAPES.map(sh => `
+    <article class="shape-row" style="background:${sh.bg}">
+      <div class="shape-label"><div class="w-16 h-16 mb-2"><svg viewBox="0 0 100 100">${sh.svg}</svg></div>
+        <h2 class="text-2xl font-bold" style="color:${sh.color}">${sh.name}</h2></div>
+      <div class="photo-slots">${[1,2].map(n=>`
+        <div class="photo-slot" data-shape="${sh.id}" data-slot="${n}">
+          <div class="photo-preview"></div>
+          <button class="photo-trigger" data-shape="${sh.id}" data-slot="${n}" aria-label="${sh.name} 사진 ${n}"><span class="plus-badge" style="color:${sh.color}">+</span></button>
+        </div>`).join("")}</div>
+    </article>`).join("");
+}
+
+function compressImage(file, cb){
+  const r = new FileReader();
+  r.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 480; let w = img.width, h = img.height;
+      if (w > h){ if (w > max){ h = Math.round(h*max/w); w = max; } }
+      else { if (h > max){ w = Math.round(w*max/h); h = max; } }
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      cb(c.toDataURL("image/jpeg",0.6));
+    };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+function updateActivityUI(){
+  if (!activeStudent) return;
+  const d = state[activeStudent.key];
+  SHAPES.forEach(sh => [1,2].forEach(n => {
+    const el = document.querySelector(`.photo-slot[data-shape="${sh.id}"][data-slot="${n}"]`);
+    const url = d[sh.id][n-1];
+    el.classList.toggle("has-photo", !!url);
+    el.querySelector(".photo-preview").style.backgroundImage = url ? `url("${url}")` : "";
+  }));
+  const b = $("complete-button");
+  b.classList.toggle("bg-[#42a6a2]", d.completed);
+  b.classList.toggle("text-white", d.completed);
+  b.textContent = d.completed ? "✅ 제출 완료됨 (수정 가능)" : "✅ 활동 완료 및 제출하기";
+}
+
+function updateDashboardUI(){
+  $("summary-grid").innerHTML = "";
+  STUDENTS.forEach(s => {
+    const d = state[s.key];
+    const counts = SHAPES.map(sh => d[sh.id].filter(Boolean).length);
+    const total = counts.reduce((a,b)=>a+b,0);
+    const found = SHAPES.filter((sh,i)=>counts[i]>0).map(sh=>sh.name).join(" · ");
+    const card = document.createElement("article");
+    card.className = "summary-card " + s.cls;
+    card.innerHTML = `
+      <h2 class="text-2xl font-bold mb-1" style="color:${s.color}">${s.name}</h2>
+      <p class="text-sm font-bold text-[#31576a]">${found ? "찾은 도형: "+found : "찾은 도형: 아직 촬영 전"}</p>
+      <div class="summary-stats">${SHAPES.map((sh,i)=>`<div class="mini-stat"><span class="text-xs font-bold" style="color:${sh.color}">${sh.name}</span><strong class="block text-xl">${counts[i]}/2</strong></div>`).join("")}</div>
+      <div class="status-line mb-3"><span class="status-dot ${d.completed?"done":""}"></span><span class="text-sm">${d.completed ? "🎉 활동 완료 및 제출됨!" : "진행 중 (사진 "+total+"/6장)"}</span></div>
+      <div class="dashboard-photos"></div>
+      <button class="nav-button w-full py-2.5 mt-4 bg-white">${s.name} 학생 화면으로 이동</button>`;
+    card.querySelector("button").onclick = () => openStudent(s);
+    const box = card.querySelector(".dashboard-photos");
+    SHAPES.forEach(sh => {
+      const g = document.createElement("div"); g.className = "dashboard-shape";
+      g.innerHTML = `<div class="text-xs font-bold text-[#31576a] mb-1.5">${sh.name} 사진</div>`;
+      const row = document.createElement("div"); row.className = "thumb-row";
+      const ph = d[sh.id].filter(Boolean);
+      if (!ph.length) row.innerHTML = '<div class="empty-thumb">없음</div>';
+      ph.forEach((u,i) => {
+        const t = document.createElement("div"); t.className = "thumb";
+        t.style.backgroundImage = `url("${u}")`;
+        t.onclick = () => openModal(u, `${s.name} - ${sh.name} 사진 ${i+1}`);
+        row.appendChild(t);
+      });
+      g.appendChild(row); box.appendChild(g);
+    });
+    $("summary-grid").appendChild(card);
+  });
+}
+
+function refresh(){
+  if (currentView()==="dashboard-view") updateDashboardUI();
+  if (currentView()==="activity-view") updateActivityUI();
+}
+
+function openStudent(s){
+  activeStudent = s; $("active-student-name").textContent = s.name;
+  $("save-status-msg").textContent = "";
+  updateActivityUI(); showView("activity-view");
+}
+function openDashboard(){ updateDashboardUI(); showView("dashboard-view"); }
+function openModal(src, cap){ $("modal-image").src = src; $("modal-caption").textContent = cap; $("photo-modal").classList.add("is-open"); }
+
+async function save(path, data){
+  if (!db) throw new Error("no-db");
+  await setDoc(doc(db, path), data);
+}
+
+async function initDb(){
+  if (firebaseConfig.apiKey.startsWith("여기에")){
+    setLive(false, "Firebase 설정 필요");
+    showNotice("⚠️ index.html 위쪽의 firebaseConfig 값을 Firebase 설정값으로 바꿔 주세요. 지금은 이 기기에서만 보입니다.");
+    return;
+  }
+  try {
+    const app = initializeApp(firebaseConfig);
+    await signInAnonymously(getAuth(app));   // 학생은 로그인 화면 없이 자동 익명 접속
+    db = getFirestore(app);
+  } catch(e){
+    db = null; setLive(false, "연결 오류");
+    showNotice("⚠️ Firebase 연결 실패: " + (e.code || e.message) + " (익명 로그인 사용 설정과 승인된 도메인을 확인하세요)");
+    return;
+  }
+  const onErr = e => { setLive(false, "연결 오류"); showNotice("⚠️ 데이터 연결 문제: " + (e.code || e.message)); };
+  onSnapshot(collection(db, "photos"), snap => {
+    STUDENTS.forEach(s => SHAPES.forEach(sh => state[s.key][sh.id] = ["",""]));
+    snap.forEach(d => {
+      const v = d.data();
+      if (v && state[v.student] && state[v.student][v.shape] && (v.slot===1 || v.slot===2)) state[v.student][v.shape][v.slot-1] = v.img || "";
+    });
+    setLive(true, "실시간 연결됨"); showNotice(""); refresh();
+  }, onErr);
+  onSnapshot(collection(db, "status"), snap => {
+    STUDENTS.forEach(s => state[s.key].completed = false);
+    snap.forEach(d => { if (state[d.id]) state[d.id].completed = !!d.data().completed; });
+    refresh();
+  }, onErr);
+}
+
+async function resetAll(){
+  if (!db) return;
+  if (!confirm("모든 학생의 사진과 제출 기록을 지울까요? 되돌릴 수 없어요.")) return;
+  for (const c of ["photos","status"]){
+    const snap = await getDocs(collection(db, c));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  buildActivity();
+  $("choose-jw").onclick = () => openStudent(STUDENTS[0]);
+  $("choose-sy").onclick = () => openStudent(STUDENTS[1]);
+  $("open-dashboard-home").onclick = openDashboard;
+  $("open-dashboard-activity").onclick = openDashboard;
+  $("back-home-activity").onclick = () => showView("home-view");
+  $("back-home-dashboard").onclick = () => showView("home-view");
+  $("reset-all").onclick = resetAll;
+  $("close-modal").onclick = () => $("photo-modal").classList.remove("is-open");
+
+  const input = $("global-camera-input");
+  document.querySelectorAll(".photo-trigger").forEach(btn => btn.addEventListener("click", e => {
+    e.preventDefault();
+    pending = {shape: btn.dataset.shape, slot: parseInt(btn.dataset.slot,10)};
+    input.value = ""; input.click();
+  }));
+
+  input.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file || !pending || !activeStudent) return;
+    const msg = $("save-status-msg"); msg.textContent = "⏳ 사진 저장 중...";
+    const {shape, slot} = pending, s = activeStudent;
+    compressImage(file, async url => {
+      state[s.key][shape][slot-1] = url; updateActivityUI();   // 바로 화면에 표시
+      try {
+        await save(`photos/${s.key}_${shape}_${slot}`, {student:s.key, shape, slot, img:url, t:Date.now()});
+        msg.textContent = db ? "✨ 사진이 선생님께 전달되었어요!" : "✨ 이 기기에만 저장되었어요 (공유 설정 필요)";
+      } catch(err){ msg.textContent = db ? "😢 저장에 실패했어요. 다시 눌러 주세요." : "✨ 이 기기에만 저장되었어요 (공유 설정 필요)"; }
+    });
+  });
+
+  $("complete-button").onclick = async () => {
+    if (!activeStudent) return;
+    const s = activeStudent; state[s.key].completed = true; updateActivityUI();
+    try { await save("status/"+s.key, {completed:true, t:Date.now()}); $("save-status-msg").textContent = "🎉 성공적으로 제출되었습니다!"; }
+    catch(err){ $("save-status-msg").textContent = db ? "😢 제출에 실패했어요. 다시 눌러 주세요." : "이 기기에만 표시됩니다 (공유 설정 필요)"; }
+  };
+
+  setLive(false, "연결 중…");
+  initDb();
+});
+</script>
+</body>
+</html>
